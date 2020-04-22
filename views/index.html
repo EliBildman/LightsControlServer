@@ -6,17 +6,28 @@
     <title>Lightz</title>
  </head>
  <body>
-    <div class="row w-100" style="height: 200px">
-      <div class="col-4">
-         <button class="w-100 h-100 button" style="background-color: red;" onclick="setAllLights([255, 0, 0])"></button>
+    <div class="row w-100">
+      <div class="col">
+         <h3>Set To</h3>
       </div>
-      <div class="col-4">
-         <button class="w-100 h-100 button" style="background-color: green;" onclick="setAllLights([0, 255, 0])"></button>
+      <div class="col">
+         <input id="r" type="number">
       </div>
-      <div class="col-4">
-         <button class="w-100 h-100 button" style="background-color: blue;" onclick="setAllLights([0, 0, 255])"></button>
+      <div class="col">
+         <input id="g" type="number">
+      </div>
+      <div class="col">
+         <input id="b" type="number">
+      </div>
+      <div class="col" id="enter">
+         <button onclick="manualDemo()">SET</button>
       </div>
     </div>
-    
+    <div class="row w-100">
+      <div class="col">
+         <h3>Test Cascade</h3>
+      </div>
+      <button onclick="cascadeDemo()">CASCADE</button>
+   </div>
 
  </body>

@@ -1,37 +1,34 @@
 
 let config;
 
-$.getJSON("/data/lights-config.json", (data) => { config = data; });
+$.getJSON("/data/leds-config.json", (data) => { config = data; });
 
-
-const lightOn = () => {
-    $.post({
-        url: "/api/light",
-        data: {state: "on"},
-        success: () => {
-            console.log("turned on");
-        }
-    })
+const manualDemo = () => {
+    setAllLights([parseInt($('#r').val()), parseInt($('#g').val()), parseInt($('#b').val())]);
 }
 
-const lightOff = () => {
+const cascadeDemo = () => {
+    let color = [150, 0, 150];
     $.post({
-        url: "/api/light",
-        data: {state: "off"},
-        success: () => {
-            console.log("turned on");
-        }
-    })
+        url: 'api/cascade',
+        data: {color: color},
+        success: console.log
+    });
 }
 
 const setAllLights = (color) => {
-    let colors = [];
-    for(let i = 0; i < config.leds; i++) colors.push(color);
     $.post({
-        url: "api/manual-set",
-        data: {render: colors},
+        url: "api/set-all",
+        data: {color: color},
         success: (msg) => {
             console.log(msg);
         }
+    });
+}
+
+const turnOff = () => {
+    $.post({
+        url: "api/all-off",
+        success: console.log
     });
 }

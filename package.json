@@ -10,7 +10,10 @@
         "express": "^4.17.1",
         "fs": "0.0.1-security",
         "onoff": "^5.0.1",
+        "promise": "^8.1.0",
+        "rgb-to-hsl": "0.0.3",
         "rpi-ws281x": "^1.0.33",
-        "rpi-ws281x-v2": "^1.3.4"
+        "rpi-ws281x-v2": "^1.3.4",
+        "tplink-smarthome-api": "^2.0.0"
     }
 }

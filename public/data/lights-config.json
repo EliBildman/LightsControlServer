@@ -1,8 +1,0 @@
-
-{
-    "leds": 10,
-    "brightness": 150,
-    "gpio": 18,
-    "dma": 10,
-    "type": "rgb"
-}

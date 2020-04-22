@@ -1,0 +1,8 @@
+
+{
+    "leds": 68,
+    "brightness": 255,
+    "gpio": 18,
+    "dma": 10,
+    "type": "grb"
+}

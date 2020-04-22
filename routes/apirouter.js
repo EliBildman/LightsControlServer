@@ -1,34 +1,38 @@
 const express = require('express');
 const router = express.Router();
-const lights = require('rpi-ws281x');
-const io = require('onoff').Gpio;
 const join = require("path").join;
 const fs = require("fs");
 
+const controller = require(join(__dirname, '..', 'tools', 'controller'));
 
-let config = JSON.parse(fs.readFileSync(join(__dirname, '..', 'public', 'data', 'lights-config.json')));
-lights.configure(config);
-
-
-
-router.get('/get-config', (req, res) => {
-    res.end(config);
-});
 
 router.get('/log', (req, res) => {
     console.log('got it!');
 });
 
 
+router.post('/set-all', (req, res) => {
+    if(!req.body.color) {
+        res.status(400);
+        return;
+    }
 
-const getRGB32 = (rgb) => {
-    [red, green, blue] = rgb;
-    return (red << 16) | (green) << 8 | blue;
-}
+    controller.setAll(req.body.color);
+
+    res.end('OK');
+    
+});
+
+router.post('/all-off', (req, res) => {
+    controller.allOff();
+
+    res.end('OK');
+});
+
 
 router.post('/manual-set', (req, res) => {
 
-    console.log(req.body.render);
+    // console.log(req.body.render);
 
     if(!req.body.render) {
         res.status(400);
@@ -36,22 +40,21 @@ router.post('/manual-set', (req, res) => {
         return;
     }
 
-    if(req.body.render.length != config.leds) {
+    if(req.body.render.length != controller.config.leds) {
         res.status(400);
-        res.end(`RENDER MUST BE OF LENGTH ${config.leds}`);
+        res.end(`RENDER MUST BE OF LENGTH ${controller.config.leds}`);
         return;
     }
 
-    let pixels = new Uint32Array(config.leds);
 
-    for(let i = 0; i < config.leds; i++) {
-        pixels[i] = getRGB32(req.body.render[i]);
-    }
-
-    lights.render(pixels);
 
     res.end("OK");
     
+});
+
+router.post('/cascade', (req, res) => {
+    controller.cascadeOn(req.body.color);
+    res.end('OK');
 });
 
 
