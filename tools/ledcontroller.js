@@ -76,7 +76,7 @@ const setLedsRGB32 = (colors) => {
 
 const setLeds = (colors) => {
 
-    if(colors.length != led_config.leds) throw `Length of colors must be ${led_config.leds}`;
+    if(colors.length != led_config.leds) throw `Length of colors must be ${led_config.leds}, is ${colors.length}`;
 
     return new Promise((res, rej) => {
         let pixels = new Uint32Array(led_config.leds);
@@ -183,12 +183,14 @@ function Wave(settings) {
 
 const randomRipple = (baseColor) => {
 
+    baseColor = [50, 50, 50];
+
     let settings = {
         
-        creationSpeed: 1,
-        speedRange: {min: 25, max: 25},
-        sizeRange: {min: 5, max: 5},
-        altColors: [[0, 0, 255], [255, 0, 0]],
+        creationSpeed: 0.2,
+        speedRange: {min: 5, max: 10},
+        sizeRange: {min: 25, max: 40},
+        altColors: [[200, 100, 0], [0, 200, 200], [100, 0, 100], [0, 200, 50]],
         refreshRate: 30,
 
     }
@@ -205,7 +207,7 @@ const randomRipple = (baseColor) => {
             color: randchoice(settings.altColors),
             location: randchoice([-1 * size / 2, led_config.leds + size / 2]),
             refreshRate: settings.refreshRate,
-            edgeTaper: 0
+            edgeTaper: 1
         }
 
         waves.push(new Wave(waveSettings));
@@ -224,8 +226,8 @@ const randomRipple = (baseColor) => {
                     weights.push({color: wave.color, weight: wave.colorWeightAt(i)});
                 }
             }
-            if(weights.length > 0) colors.push(combineColorsWeighted(weights));
-            else colors.push(baseColor);
+            weights.push({color: baseColor, weight: 1}); //not sure ab how to make the center the true color
+            colors.push(combineColorsWeighted(weights));
         }
 
         return colors;
