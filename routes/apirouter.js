@@ -57,5 +57,10 @@ router.post('/cascade', (req, res) => {
     res.end('OK');
 });
 
+router.post('/randomRipple', (req, res) => {
+    controller.randomRipple(req.body.color);
+    res.end('OK')
+})
+
 
 module.exports = router;

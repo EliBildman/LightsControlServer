@@ -1,0 +1,265 @@
+const fs = require('fs');
+const join = require('path').join;
+const leds = require('rpi-ws281x');
+
+const led_config = JSON.parse(fs.readFileSync(join(__dirname, '..', 'public', 'data', 'leds-config.json')));
+leds.configure(led_config);
+
+
+const state = {
+    baseColor: [0, 0, 0],
+    brightness: 0,
+    routine: null,
+}
+
+const randint = (min, max) => {
+    return Math.floor(Math.random() * (max - min) + min);
+}
+
+const randchoice = (itt) => {
+    return itt[randint(0, itt.length)];
+}
+
+const RGBtoRGB32 = (rgb) => {
+    [red, green, blue] = rgb;
+    return (red << 16) | (green) << 8 | blue;
+}
+
+const combineColors = (a, b) => {
+    let comb = [];
+    for(i in a) {
+        comb.push((a[i] + b[i]) / 2);
+    }
+    return comb;
+}
+
+//must be {color: [r, g, b], weight: num}
+
+const combineColorsWeighted = (colorWeights) => {
+
+    let sum = colorWeights.reduce((acc, curr) => acc + curr.weight, 0);
+
+    let comb = [0, 0, 0];
+
+    for(i in comb) comb[i] = (colorWeights.reduce((acc, curr) => {
+        return acc + curr.color[i] * (curr.weight / sum);
+    }, 0));
+
+    return comb;
+
+}
+
+
+const setAllLeds = (color) => {
+    return new Promise((res, rej) => {
+
+        let conv = RGBtoRGB32(color);
+        let pixels = new Uint32Array(led_config.leds);
+
+        for(i in pixels) {
+            pixels[i] = conv;
+        }
+
+        leds.render(pixels);
+
+        res();
+    })
+
+}
+
+const setLedsRGB32 = (colors) => {
+    return new Promise((res, rej) => {
+        leds.render(colors);
+        res();
+    });
+}
+
+const setLeds = (colors) => {
+
+    if(colors.length != led_config.leds) throw `Length of colors must be ${led_config.leds}`;
+
+    return new Promise((res, rej) => {
+        let pixels = new Uint32Array(led_config.leds);
+        
+        for(i in pixels) {
+            pixels[i] = RGBtoRGB32(colors[i]);
+        }
+
+        leds.render(pixels);
+        res();
+
+    });
+}
+
+const cascadeLeds = (speed, color) => {
+    clearInterval(state.routine);
+    let currLed = 0;
+    let numLeds = led_config.leds;
+    let off32 = RGBtoRGB32([0, 0, 0]);
+    let color32 = RGBtoRGB32(color);
+    return new Promise((res, rej) => {
+        state.routine = setInterval(() => {
+
+            let pixels = new Uint32Array(led_config.leds);
+            for(let i = 0; i < led_config.leds; i++) {
+                if(i <= currLed) pixels[i] = color32;
+                else pixels[i] = off32;
+            }
+
+            leds.render(pixels);
+
+            currLed += 1;
+
+            if(currLed >= numLeds) {
+                clearInterval(state.routine);
+                res();
+            }
+        }, 1000/speed);
+    });
+}
+
+function Wave(settings) {
+
+    //setting default values (might revisit this)
+
+    if(!settings.refreshRate) throw "i need the refresh rate man come on";
+
+    if(!settings.dir) {
+        if(!settings.location) this.dir = 1;
+        else {
+            if(settings.location > led_config.leds / 2) this.dir = -1;
+            else this.dir = 1;
+        }
+    } else 
+        this.dir = settings.dir;
+
+    if(!settings.location) {
+        if(!settings.dir) this.location = 0;
+        else {
+            if(settings.dir == 1) this.location = 0;
+            else this.location = led_config.leds;
+        }
+    } else
+        this.location = settings.location;
+
+    if(!settings.radius) {
+        if(settings.size) this.radius = settings.size / 2;
+        else this.radius = 5;
+    }
+
+    if(!settings.color) this.color = [150, 150, 150];
+    else this.color = settings.color;
+
+    if(!settings.speed) this.speed = 10;
+    else this.speed = settings.speed;
+
+    if(!settings.edgeTaper) this.edgeTaper = 0;
+    else this.edgeTaper = settings.edgeTaper;
+
+
+    this.move = () => {
+        // console.log(this.speed);
+        this.location += this.speed / settings.refreshRate * this.dir;
+    };
+
+    this.outOfBounds =  () => {
+        return this.location - this.radius > led_config.leds || this.location + this.radius < 0
+    },
+
+    this.colorWeightAt = (i) => {
+        if(!this.covers(i))
+            return 0;
+        else 
+            return 1 - ( Math.abs(this.location - i) / this.radius * this.edgeTaper );
+    },
+
+    this.covers =  (i) => {
+        // console.log(i, this.location, this.radius, i > this.location - this.radius && i < this.location + this.radius)
+        return i > this.location - this.radius && i < this.location + this.radius;
+    }
+
+}
+
+
+const randomRipple = (baseColor) => {
+
+    let settings = {
+        
+        creationSpeed: 1,
+        speedRange: {min: 25, max: 25},
+        sizeRange: {min: 5, max: 5},
+        altColors: [[0, 0, 255], [255, 0, 0]],
+        refreshRate: 30,
+
+    }
+
+    let waves = [];
+
+    let createWave = setInterval(() => {
+
+        let size = randint(settings.sizeRange.min, settings.sizeRange.max);
+
+        let waveSettings = {
+            size: size,
+            speed: randint(settings.speedRange.min, settings.speedRange.max),
+            color: randchoice(settings.altColors),
+            location: randchoice([-1 * size / 2, led_config.leds + size / 2]),
+            refreshRate: settings.refreshRate,
+            edgeTaper: 0
+        }
+
+        waves.push(new Wave(waveSettings));
+
+    }, 1000 / settings.creationSpeed);
+
+
+    let render = () => {
+
+        let colors = [];
+
+        for(let i = 0; i < led_config.leds; i++) {
+            let weights = [];
+            for(wave of waves) {
+                if(wave.covers(i)) {
+                    weights.push({color: wave.color, weight: wave.colorWeightAt(i)});
+                }
+            }
+            if(weights.length > 0) colors.push(combineColorsWeighted(weights));
+            else colors.push(baseColor);
+        }
+
+        return colors;
+
+    }
+
+    console.log('SET STATE: RANDOM_RIPPLE');
+    clearState();
+    state.baseColor = baseColor;
+    state.routine = setInterval(() => {
+
+        let colors = render();
+
+        for(wave of waves) {
+            wave.move();
+            if(wave.outOfBounds()) {
+                waves.splice(waves.indexOf(wave), 1);
+            }
+        }
+
+        setLeds(colors);
+
+    }, 1000 / settings.refreshRate);
+
+}
+
+const clearState = () => {
+    if(state.routine) clearInterval(state.routine);
+}
+
+module.exports = {
+    setAllLeds,
+    setLedsRGB32,
+    setLeds,
+    randomRipple,
+    cascadeLeds
+}

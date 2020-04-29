@@ -8,9 +8,18 @@ const manualDemo = () => {
 }
 
 const cascadeDemo = () => {
-    let color = [150, 0, 150];
+    let color = [parseInt($('#aniR').val()), parseInt($('#aniG').val()), parseInt($('#aniB').val())]
     $.post({
         url: 'api/cascade',
+        data: {color: color},
+        success: console.log
+    });
+}
+
+const rippleDemo = () => {
+    let color = [parseInt($('#aniR').val()), parseInt($('#aniG').val()), parseInt($('#aniB').val())]
+    $.post({
+        url: 'api/randomRipple',
         data: {color: color},
         success: console.log
     });
