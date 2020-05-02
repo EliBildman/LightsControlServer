@@ -182,6 +182,10 @@ class Wave {
         else
             this.edgeTaper = settings.edgeTaper;
 
+        
+        this.size = this.radius * 2
+
+
         this.move = () => {
             // console.log(this.speed);
             this.location += this.speed / settings.refreshRate * this.dir;
@@ -208,10 +212,13 @@ class Wave {
          * @param {Array<Array<number>} colors Render List
          */
         this.applyTo = (colors) => {
-            for(let i = this.locaiton - this.radius; i < this.location + this.radius; i++) {
+
+            for(let i = this.location - this.radius; i < this.location + this.radius; i++) {
+                i = Math.floor(i);
                 if( i >= 0 && i < colors.length) {
                     let w = this.colorWeightAt(i);
-                    colors[i] = combineColorsWeighted({color: this.color, weight: w}, {color: colors[i], weight: 1 - w});
+                    
+                    colors[i] = combineColorsWeighted([{color: this.color, weight: w}, {color: colors[i], weight: 1 - w}]);
                 }
             }
         }
@@ -305,33 +312,36 @@ const pingPong = (settings) => {
         auxColors: [[0, 0, 255]],
         numPings: 1,
         pingSize: 10,
-        pingSpeed: 10,
-        pingSpacing: 10,
+        pingSpeed: 40,
+        pingSpacing: 20,
         refreshRate: 30,
         alternateDir: false
     });
 
-    if(settings.auxColors.length != settings.numPings) throw `why is numPings ${settings.numPings} but auxColors ${settings.auxColors.length} long`;
+    // if(settings.auxColors.length != settings.numPings) throw `why is numPings ${settings.numPings} but auxColors ${settings.auxColors.length} long`;
 
     let pings = [];
 
-    for(i in settings.numPings) {
+    for(let i = 0; i < settings.numPings; i++) {
 
         let refreshRate = settings.refreshRate;
         let size = settings.pingSize;
+
+        let location;
+        let dir;
         
         if(settings.alternateDir) {
-            let location = (i % 2 == 0) ? (size / 2) : (led_config.leds - 1 - size / 2);
-            let dir = (i % 2 == 0) ? (1) : (0);
+            location = (i % 2 == 0) ? (size / 2) : (led_config.leds - 1 - size / 2);
+            dir = (i % 2 == 0) ? (1) : (-1);
         } else {
-            let location = 0;
-            let dir = 1;
+            location = 0;
+            dir = 1;
         }
 
-        let color = settings.auxColors[i];
-        let speed = settings.speed;
+        let color = settings.auxColors[i % settings.auxColors.length];
+        let speed = settings.pingSpeed;
 
-        location += (-dir * settings.pingSpacing * i) + settings.pingSize / 2; // do the initial offset, puts them all out of bounds (assuming they started on the ends)
+        location += ((-dir * settings.pingSpacing * i) + settings.pingSize / 2) / (settings.alternateDir ? 2 : 1); // do the initial offset, puts them all out of bounds (assuming they started on the ends)
 
         pings.push(new Wave({
             refreshRate,
@@ -348,7 +358,7 @@ const pingPong = (settings) => {
         
         let colors = [];
 
-        for(i in led_config.leds) {
+        for(let i = 0; i < led_config.leds; i++) {
             colors.push(settings.baseColor);
         }
         
@@ -370,10 +380,11 @@ const pingPong = (settings) => {
 
             ping.move();
 
+
             if(ping.dir == 1) {
-                if(ping.location >= led_config.leds - ping.size / 2) ping.dir = -1;
+                if(ping.location >= led_config.leds - ping.radius) ping.dir = -1;
             } else {
-                if(ping.location <= ping.size / 2) ping.dir = 1;
+                if(ping.location <= ping.radius) ping.dir = 1;
             }
 
         }

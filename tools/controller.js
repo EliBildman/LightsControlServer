@@ -42,9 +42,18 @@ const pingPong = (settings) => {
         baseColor: [255, 255, 255]
     });
 
-    leds.states.pingPong({baseColor: settings.BaseColor});
+    bulb.setBulb(settings.baseColor)
+    .then(() => { leds.states.pingPong({
+        refreshRate: 60,
+        baseColor: settings.baseColor,
+        pingSpeed: 40,
+        numPings: 2,
+        pingSize: 10,
+        pingSpacing: 20,
+        alternateDir: true,
+        auxColors: [[100, 100, 0], [100, 100, 100]]
+    }) });
 }
-
 
 module.exports = {
     pingPong,
