@@ -62,5 +62,11 @@ router.post('/randomRipple', (req, res) => {
     res.end('OK')
 })
 
+router.post('/pingPong', (req, res) => {
+    controller.pingPong({ baseColor: req.body.color });
+    res.end('OK')
+})
+
+
 
 module.exports = router;

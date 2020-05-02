@@ -25,6 +25,15 @@ const rippleDemo = () => {
     });
 }
 
+const pingPongDemo = () => {
+    let color = [parseInt($('#aniR').val()), parseInt($('#aniG').val()), parseInt($('#aniB').val())]
+    $.post({
+        url: 'api/pingPong',
+        data: {color: color},
+        success: console.log
+    });
+}
+
 const setAllLights = (color) => {
     $.post({
         url: "api/set-all",

@@ -1,15 +1,20 @@
 const fs = require('fs');
 const join = require('path').join;
 const leds = require('rpi-ws281x');
+const defaults = require('defaults');
 
 const led_config = JSON.parse(fs.readFileSync(join(__dirname, '..', 'public', 'data', 'leds-config.json')));
 leds.configure(led_config);
+
+
+//TODO: Make the config dynamic for multiple strips and put in deffinition obj
 
 
 const state = {
     baseColor: [0, 0, 0],
     brightness: 0,
     routine: null,
+    remove: null
 }
 
 const randint = (min, max) => {
@@ -118,66 +123,99 @@ const cascadeLeds = (speed, color) => {
     });
 }
 
-function Wave(settings) {
 
-    //setting default values (might revisit this)
+class Wave {
 
-    if(!settings.refreshRate) throw "i need the refresh rate man come on";
+    /**
+     * creates a Wave object
+     * @param {object} settings { refreshRate, location, dir, radius/size, color, speed, edgeTaper }
+     */
+    constructor(settings) {
+        //setting default values (might revisit this)
+        if (!settings.refreshRate)
+            throw "i need the refresh rate man come on";
+        
+        if (!settings.dir) {
+            if (!settings.location)
+                this.dir = 1;
+            else {
+                if (settings.location > led_config.leds / 2)
+                    this.dir = -1;
+                else
+                    this.dir = 1;
+            }
+        } else
+            this.dir = settings.dir;
 
-    if(!settings.dir) {
-        if(!settings.location) this.dir = 1;
-        else {
-            if(settings.location > led_config.leds / 2) this.dir = -1;
-            else this.dir = 1;
+        if (!settings.location) {
+            if (!settings.dir)
+                this.location = 0;
+            else {
+                if (settings.dir == 1)
+                    this.location = 0;
+                else
+                    this.location = led_config.leds;
+            }
         }
-    } else 
-        this.dir = settings.dir;
+        else
+            this.location = settings.location;
 
-    if(!settings.location) {
-        if(!settings.dir) this.location = 0;
-        else {
-            if(settings.dir == 1) this.location = 0;
-            else this.location = led_config.leds;
+        if (!settings.radius) {
+            if (settings.size)
+                this.radius = settings.size / 2;
+            else
+                this.radius = 5;
         }
-    } else
-        this.location = settings.location;
 
-    if(!settings.radius) {
-        if(settings.size) this.radius = settings.size / 2;
-        else this.radius = 5;
+        if (!settings.color)
+            this.color = [150, 150, 150];
+        else
+            this.color = settings.color;
+
+        if (!settings.speed)
+            this.speed = 10;
+        else
+            this.speed = settings.speed;
+
+        if (!settings.edgeTaper)
+            this.edgeTaper = 0;
+        else
+            this.edgeTaper = settings.edgeTaper;
+
+        this.move = () => {
+            // console.log(this.speed);
+            this.location += this.speed / settings.refreshRate * this.dir;
+        };
+
+        this.outOfBounds = () => {
+            return this.location - this.radius > led_config.leds || this.location + this.radius < 0;
+        },
+
+        this.colorWeightAt = (i) => {
+            if (!this.covers(i))
+                return 0;
+            else
+                return 1 - (Math.abs(this.location - i) / this.radius * this.edgeTaper);
+        },
+
+        this.covers = (i) => {
+            // console.log(i, this.location, this.radius, i > this.location - this.radius && i < this.location + this.radius)
+            return i > this.location - this.radius && i < this.location + this.radius;
+        };
+
+        /**
+         * pastes this wave onto a render list, averages in stored value based on colorWeightAt()
+         * @param {Array<Array<number>} colors Render List
+         */
+        this.applyTo = (colors) => {
+            for(let i = this.locaiton - this.radius; i < this.location + this.radius; i++) {
+                if( i >= 0 && i < colors.length) {
+                    let w = this.colorWeightAt(i);
+                    colors[i] = combineColorsWeighted({color: this.color, weight: w}, {color: colors[i], weight: 1 - w});
+                }
+            }
+        }
     }
-
-    if(!settings.color) this.color = [150, 150, 150];
-    else this.color = settings.color;
-
-    if(!settings.speed) this.speed = 10;
-    else this.speed = settings.speed;
-
-    if(!settings.edgeTaper) this.edgeTaper = 0;
-    else this.edgeTaper = settings.edgeTaper;
-
-
-    this.move = () => {
-        // console.log(this.speed);
-        this.location += this.speed / settings.refreshRate * this.dir;
-    };
-
-    this.outOfBounds =  () => {
-        return this.location - this.radius > led_config.leds || this.location + this.radius < 0
-    },
-
-    this.colorWeightAt = (i) => {
-        if(!this.covers(i))
-            return 0;
-        else 
-            return 1 - ( Math.abs(this.location - i) / this.radius * this.edgeTaper );
-    },
-
-    this.covers =  (i) => {
-        // console.log(i, this.location, this.radius, i > this.location - this.radius && i < this.location + this.radius)
-        return i > this.location - this.radius && i < this.location + this.radius;
-    }
-
 }
 
 
@@ -254,14 +292,110 @@ const randomRipple = (baseColor) => {
 
 }
 
+/**
+ * Creates ping-ponging waves
+ * @param {settings} { baseColor, auxColors, numPings, pingSize, pingSpeed, pingSpacing, refreshRate, alternateDir } 
+ */
+const pingPong = (settings) => {
+
+    if(!settings) settings = {};
+    
+    settings = defaults(settings, {
+        baseColor: [255, 255, 255],
+        auxColors: [[0, 0, 255]],
+        numPings: 1,
+        pingSize: 10,
+        pingSpeed: 10,
+        pingSpacing: 10,
+        refreshRate: 30,
+        alternateDir: false
+    });
+
+    if(settings.auxColors.length != settings.numPings) throw `why is numPings ${settings.numPings} but auxColors ${settings.auxColors.length} long`;
+
+    let pings = [];
+
+    for(i in settings.numPings) {
+
+        let refreshRate = settings.refreshRate;
+        let size = settings.pingSize;
+        
+        if(settings.alternateDir) {
+            let location = (i % 2 == 0) ? (size / 2) : (led_config.leds - 1 - size / 2);
+            let dir = (i % 2 == 0) ? (1) : (0);
+        } else {
+            let location = 0;
+            let dir = 1;
+        }
+
+        let color = settings.auxColors[i];
+        let speed = settings.speed;
+
+        location += (-dir * settings.pingSpacing * i) + settings.pingSize / 2; // do the initial offset, puts them all out of bounds (assuming they started on the ends)
+
+        pings.push(new Wave({
+            refreshRate,
+            size,
+            location,
+            dir,
+            color,
+            speed,
+        }));
+
+    }
+
+    let render = () => {
+        
+        let colors = [];
+
+        for(i in led_config.leds) {
+            colors.push(settings.baseColor);
+        }
+        
+        for(ping of pings) {
+            ping.applyTo(colors);
+        }
+
+        setLeds(colors);
+
+    }
+
+    console.log('SET STATE: PING_PONG');
+    clearState();
+    state.baseColor = settings.baseColor;
+
+    state.routine = setInterval(() => {
+
+        for(ping of pings) {
+
+            ping.move();
+
+            if(ping.dir == 1) {
+                if(ping.location >= led_config.leds - ping.size / 2) ping.dir = -1;
+            } else {
+                if(ping.location <= ping.size / 2) ping.dir = 1;
+            }
+
+        }
+
+        render();
+
+    }, 1000 / settings.refreshRate);
+
+}
+
 const clearState = () => {
     if(state.routine) clearInterval(state.routine);
+    if(state.remove) state.remove();
 }
 
 module.exports = {
-    setAllLeds,
-    setLedsRGB32,
-    setLeds,
-    randomRipple,
-    cascadeLeds
+    anis: {
+        cascadeLeds,
+        setAllLeds
+    },
+    states: {
+        pingPong,
+        randomRipple
+    }
 }
