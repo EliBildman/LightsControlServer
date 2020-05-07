@@ -32,8 +32,6 @@ router.post('/all-off', (req, res) => {
 
 router.post('/manual-set', (req, res) => {
 
-    // console.log(req.body.render);
-
     if(!req.body.render) {
         res.status(400);
         res.end("NEED RENDER DATA");
@@ -57,12 +55,12 @@ router.post('/cascade', (req, res) => {
     res.end('OK');
 });
 
-router.post('/randomRipple', (req, res) => {
+router.post('/random-ripple', (req, res) => {
     controller.randomRipple(req.body.color);
     res.end('OK')
 })
 
-router.post('/pingPong', (req, res) => {
+router.post('/ping-pong', (req, res) => {
     controller.pingPong({ baseColor: req.body.color });
     res.end('OK')
 })

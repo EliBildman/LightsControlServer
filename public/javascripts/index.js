@@ -10,7 +10,7 @@ const manualDemo = () => {
 const cascadeDemo = () => {
     let color = [parseInt($('#aniR').val()), parseInt($('#aniG').val()), parseInt($('#aniB').val())]
     $.post({
-        url: 'api/cascade',
+        url: 'api/lights/cascade',
         data: {color: color},
         success: console.log
     });
@@ -19,7 +19,7 @@ const cascadeDemo = () => {
 const rippleDemo = () => {
     let color = [parseInt($('#aniR').val()), parseInt($('#aniG').val()), parseInt($('#aniB').val())]
     $.post({
-        url: 'api/randomRipple',
+        url: 'api/lights/random-ripple',
         data: {color: color},
         success: console.log
     });
@@ -28,7 +28,7 @@ const rippleDemo = () => {
 const pingPongDemo = () => {
     let color = [parseInt($('#aniR').val()), parseInt($('#aniG').val()), parseInt($('#aniB').val())]
     $.post({
-        url: 'api/pingPong',
+        url: 'api/lights/ping-pong',
         data: {color: color},
         success: console.log
     });
@@ -36,7 +36,7 @@ const pingPongDemo = () => {
 
 const setAllLights = (color) => {
     $.post({
-        url: "api/set-all",
+        url: "api/lights/set-all",
         data: {color: color},
         success: (msg) => {
             console.log(msg);
@@ -46,7 +46,18 @@ const setAllLights = (color) => {
 
 const turnOff = () => {
     $.post({
-        url: "api/all-off",
+        url: "api/lights/all-off",
         success: console.log
+    });
+}
+
+
+const sendWake = () => {
+    $.post({
+        url: '/api/toggle/turn-on',
+        data: {mac: "38:D5:47:18:37:51"},
+        success: (msg) => {
+            console.log(msg);
+        }
     });
 }

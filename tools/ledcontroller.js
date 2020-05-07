@@ -228,7 +228,7 @@ class Wave {
 
 const randomRipple = (settings) => {
 
-    settings = deafults(settings, {
+    settings = defaults(settings, {
         creationSpeed: 0.2,
         speedRange: {min: 5, max: 10},
         sizeRange: {min: 25, max: 40},

@@ -9,13 +9,14 @@ const port = 3000;
 app.use(express.static(join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-//tes5t
 
 
 //routes
-const apiRoute = require('./routes/apirouter');
+const lightsRoute = require(join(__dirname, 'routes', 'lights-router'));
+const toggleRoute = require(join(__dirname, 'routes', 'remote-toggle-router'));
 
-app.use('/api', apiRoute);
+app.use('/api/lights', lightsRoute);
+app.use('/api/toggle', toggleRoute);
 
 
 //index
