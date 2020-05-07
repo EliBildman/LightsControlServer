@@ -226,19 +226,15 @@ class Wave {
 }
 
 
-const randomRipple = (baseColor) => {
+const randomRipple = (settings) => {
 
-    baseColor = [50, 50, 50];
-
-    let settings = {
-        
+    settings = deafults(settings, {
         creationSpeed: 0.2,
         speedRange: {min: 5, max: 10},
         sizeRange: {min: 25, max: 40},
-        altColors: [[200, 100, 0], [0, 200, 200], [100, 0, 100], [0, 200, 50]],
+        auxColors: [[200, 100, 0], [0, 200, 200], [100, 0, 100], [0, 200, 50]],
         refreshRate: 30,
-
-    }
+    });
 
     let waves = [];
 
@@ -249,7 +245,7 @@ const randomRipple = (baseColor) => {
         let waveSettings = {
             size: size,
             speed: randint(settings.speedRange.min, settings.speedRange.max),
-            color: randchoice(settings.altColors),
+            color: randchoice(settings.auxColors),
             location: randchoice([-1 * size / 2, led_config.leds + size / 2]),
             refreshRate: settings.refreshRate,
             edgeTaper: 1
@@ -281,7 +277,7 @@ const randomRipple = (baseColor) => {
 
     console.log('SET STATE: RANDOM_RIPPLE');
     clearState();
-    state.baseColor = baseColor;
+    state.baseColor = settings.baseColor;
     state.routine = setInterval(() => {
 
         let colors = render();
