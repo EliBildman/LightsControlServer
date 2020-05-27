@@ -3,8 +3,19 @@ const join = require('path').join;
 const leds = require('rpi-ws281x');
 const defaults = require('defaults');
 
-const led_config = JSON.parse(fs.readFileSync(join(__dirname, '..', 'public', 'data', 'leds-config.json')));
-leds.configure(led_config);
+// leds, brightness, gpio, dma = 10 (?), type = "grb"
+
+const leds_config = JSON.parse(fs.readFileSync(join(__dirname, '..', 'public', 'data', 'leds-config.json')));
+
+const config_obj = {
+    leds: leds_config[0].length,
+    gpio: leds_config[0].gpio,
+    brightness: 255,
+    dma: 10,
+    type: 'grb'
+}
+
+// leds.configure(config_obj);
 
 
 //TODO: Make the config dynamic for multiple strips and put in deffinition obj
@@ -395,6 +406,12 @@ const clearState = () => {
     if(state.routine) clearInterval(state.routine);
     if(state.remove) state.remove();
 }
+
+
+const send = (ani) => {
+    //send lmao
+}
+
 
 module.exports = {
     anis: {

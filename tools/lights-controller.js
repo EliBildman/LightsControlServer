@@ -3,8 +3,8 @@ const fs = require('fs');
 const RGBtoHSL = require('rgb-to-hsl');
 const defaults = require('defaults');
 
-const leds = require(join(__dirname, 'ledcontroller'));
-const bulb = require(join(__dirname, 'tpcontroller'));
+const leds = require(join(__dirname, 'led-controller'));
+const bulb = require(join(__dirname, 'tp-controller'));
 
 
 
@@ -12,8 +12,7 @@ const bulb = require(join(__dirname, 'tpcontroller'));
 const setAll = (color, next) => {
 
     return bulb.setBulb(color)
-    .then(() => { leds.anis.setAllLeds(color); });
-
+    .then(() => { leds.set_color(color); });
 
 }
 
@@ -55,10 +54,19 @@ const pingPong = (settings) => {
     }) });
 }
 
+const connect_led = (ws) => {
+
+    leds.new_strip(ws);
+
+}
+
 module.exports = {
+
     pingPong,
     setAll,
     allOff,
     randomRipple,
     cascadeOn,
+    connect_led
+    
 }

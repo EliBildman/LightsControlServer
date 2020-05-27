@@ -11,7 +11,9 @@ router.post('/turn-on', (req, res) => {
         return;
     }
 
-    wol(req.body.mac).then(() => { console.log(`Sent WOL Packet to ${req.body.mac}`); });
+    wol(req.body.mac)
+    .then(() => { console.log(`Sent WOL packet to ${req.body.mac}`); })
+    .catch((err) => { `Error in sending WOL packet to ${req.body.mac}:\n${err}` });
 
     res.status(200);
     res.end("SENDING");

@@ -3,21 +3,20 @@ const router = express.Router();
 const join = require("path").join;
 const fs = require("fs");
 
-const controller = require(join(__dirname, '..', 'tools', 'controller'));
-
-
-router.get('/log', (req, res) => {
-    console.log('got it!');
-});
+const controller = require(join(__dirname, '..', 'tools', 'lights-controller'));
 
 
 router.post('/set-all', (req, res) => {
+
     if(!req.body.color) {
         res.status(400);
         return;
     }
 
-    controller.setAll(req.body.color);
+    let color = [];
+    for(c of req.body.color) color.push(parseInt(c));
+
+    controller.setAll(color);
 
     res.end('OK');
     
@@ -44,8 +43,6 @@ router.post('/manual-set', (req, res) => {
         return;
     }
 
-
-
     res.end("OK");
     
 });
@@ -58,12 +55,18 @@ router.post('/cascade', (req, res) => {
 router.post('/random-ripple', (req, res) => {
     controller.randomRipple(req.body.color);
     res.end('OK')
-})
+});
 
 router.post('/ping-pong', (req, res) => {
     controller.pingPong({ baseColor: req.body.color });
     res.end('OK')
-})
+});
+
+router.ws('/connect', (ws, req) => {
+
+    controller.connect_led(ws);
+
+});
 
 
 

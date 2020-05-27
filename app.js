@@ -2,13 +2,14 @@ const express = require('express');
 const app = express();
 const join = require('path').join;
 const bodyParser = require('body-parser');
+const expressWs = require('express-ws')(app);
 
 const port = 3000;
 
 //middleware (?)
 app.use(express.static(join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
-
+app.use(bodyParser.json());
 
 
 //routes

@@ -55,7 +55,7 @@ const turnOff = () => {
 const sendWake = () => {
     $.post({
         url: '/api/toggle/turn-on',
-        data: {mac: "38:D5:47:18:37:51"},
+        data: {mac: "38:D5:47:28:37:51"},
         success: (msg) => {
             console.log(msg);
         }
