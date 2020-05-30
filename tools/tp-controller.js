@@ -28,7 +28,7 @@ const setBulb = (color) => {
     });
 }
 
-const bulbOff = () => {
+const off = () => {
     return bulb.lighting.setLightState({
         on_off: false,
         transition_period: 0
@@ -37,5 +37,5 @@ const bulbOff = () => {
 
 module.exports = {
     setBulb,
-    bulbOff
+    off
 }

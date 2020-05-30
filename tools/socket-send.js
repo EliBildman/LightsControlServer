@@ -1,36 +1,49 @@
 const defaults = require('defaults');
 const join = require('path').join;
-// const hex = require('rgb-hex');
+const uid = require('uid');
 const toRGB32 = require(join(__dirname, 'helpers')).rgb_to_rgb32;
 
 const socket = (ws) => {
 
     let config = {};
-
     config.ws = ws;
 
-    const handleConfigData = (message) => {
-
-        console.log("NEW LIGHTS STRIP CONNECTED");
-
-        let conn_data = JSON.parse(message);
-        config.pipe = ws;
-        config.length = conn_data.length;
-        config.index = conn_data.index;
-
-        //send confirmation
-        ws.send("CONNECTED");
-
-        ws.removeEventListener('message', handleConfigData);
-
-    };
-
     //on getting config data
-    ws.on('message', handleConfigData);
+    ws.on('message', (msg) => {
+
+        msg = JSON.parse(msg);
+
+        if(msg.type === 'CONFIG') {
+
+            console.log("NEW LIGHTS STRIP CONNECTED");
+
+            config.pipe = ws;
+            config.length = msg.length;
+            config.index = msg.index;
+
+            //send confirmation
+            ws.send("CONNECTED");
+
+        }
+
+    });
 
     //on end connection
-    ws.on('close', () => {
-        console.log('LIGHTS STRIP DISCONNECT');
+    ws.on('close', (e) => {
+        
+        console.log('err' + e);
+        console.log(e);
+        
+        // if(rsn.code  === 1000) { //normal
+
+        //     console.log('NORMAL DISCONNECT');
+
+        // } else { //abnormal
+
+        //     console.log('ABNORMAL DISCONNECT, ATTEMPING RECONNECT');
+
+
+        // }
     });
 
     config.send_state = (state) => {
@@ -38,22 +51,64 @@ const socket = (ws) => {
         //should do some input checking here, it's bad if the arduino dies
 
         //colors: list of lists of length config.length
+        //length: colors.length
         //mode: static / run / loop / bounce
+        //id: uid
 
-        for(let i = 0; i < state.colors.length; i++) {
-
-            for(let j = 0; j < state.colors[i].length; j++) {
-                state.colors[i][j] = toRGB32(state.colors[i][j]);
-            }
-
-        }
+        state.id = uid();
+        state.length = state.colors.length;
+        state.colors = contruct_diff(state.colors);
 
         ws.send(JSON.stringify(state));
+
+        return new Promise((res, rej) => {
+            const callback_listener = (msg) => {
+
+                msg = JSON.parse(msg);
+
+                if(msg.type === 'CALLBACK' && msg.id === state.id) {
+                    ws.removeEventListener('message', callback_listener);
+                    // console.log('callback');
+                    res();
+                }
+
+                setTimeout(() => { 
+                    rej("took too long");
+                    ws.removeEventListener('message', callback_listener);
+                }, config.length * 1000);
+
+            };
+            ws.on('message', callback_listener);
+        });
+
     };
 
     return config;
 
 };
+
+const contruct_diff = (colors) => {
+
+    let diff = [];
+
+    for(let i = 0; i < colors.length; i++) {
+        diff.push({});
+        for(let j = 0; j < colors[i].length; j++) {
+            if(i == 0 || !colorEq(colors[i][j], colors[i - 1][j])) {
+                diff[i][`${j}`] = toRGB32(colors[i][j]);
+            }
+        }
+    }
+
+    return diff;
+
+}
+
+const colorEq = (a, b) => {
+    for(i in a) if(a[i] != b[i]) return false;
+    return true;
+}
+
 
 module.exports = {
     socket

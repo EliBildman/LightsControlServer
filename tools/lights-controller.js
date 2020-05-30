@@ -9,24 +9,28 @@ const bulb = require(join(__dirname, 'tp-controller'));
 
 
 
-const setAll = (color, next) => {
+const setAll = (color) => {
 
-    return bulb.setBulb(color)
-    .then(() => { leds.set_color(color); });
+    return Promise.all([
+        bulb.setBulb(color),
+        leds.set_color(color)
+    ]);
 
 }
 
-const allOff = (next) => {
+const allOff = () => {
 
-    return bulb.bulbOff()
-    .then(() => leds.anis.setAllLeds([0, 0, 0]));
+    return Promise.all([
+        bulb.off(),
+        leds.off()
+    ]);
 
 }
 
 const cascadeOn = (color) => {
 
     allOff()
-    .then(() => leds.anis.cascadeLeds(50, color))
+    .then(() => leds.cascade_on(color))
     .then(() => bulb.setBulb(color));
 
 }

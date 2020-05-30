@@ -13,10 +13,9 @@ router.post('/set-all', (req, res) => {
         return;
     }
 
-    let color = [];
-    for(c of req.body.color) color.push(parseInt(c));
+    req.body.color.map(parseInt);
 
-    controller.setAll(color);
+    controller.setAll(req.body.color);
 
     res.end('OK');
     
