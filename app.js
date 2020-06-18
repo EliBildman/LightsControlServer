@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 
 //routes
 const lightsRoute = require(join(__dirname, 'routes', 'lights-router'));
-const toggleRoute = require(join(__dirname, 'routes', 'remote-toggle-router'));
+const toggleRoute = require(join(__dirname, 'routes', 'toggle-router'));
 
 app.use('/api/lights', lightsRoute);
 app.use('/api/toggle', toggleRoute);

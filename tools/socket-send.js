@@ -7,6 +7,7 @@ const socket = (ws) => {
 
     let config = {};
     config.ws = ws;
+    config.ready = false;
 
     //on getting config data
     ws.on('message', (msg) => {
@@ -17,6 +18,7 @@ const socket = (ws) => {
 
             console.log("NEW LIGHTS STRIP CONNECTED");
 
+            config.ready = true;
             config.pipe = ws;
             config.length = msg.length;
             config.index = msg.index;
@@ -31,8 +33,7 @@ const socket = (ws) => {
     //on end connection
     ws.on('close', (e) => {
         
-        console.log('err' + e);
-        console.log(e);
+        console.log('disconnect ' + e);
         
         // if(rsn.code  === 1000) { //normal
 
@@ -60,6 +61,8 @@ const socket = (ws) => {
         state.colors = contruct_diff(state.colors);
 
         ws.send(JSON.stringify(state));
+
+        console.log('sending state: ' + state.id);
 
         return new Promise((res, rej) => {
             const callback_listener = (msg) => {
@@ -94,7 +97,7 @@ const contruct_diff = (colors) => {
     for(let i = 0; i < colors.length; i++) {
         diff.push({});
         for(let j = 0; j < colors[i].length; j++) {
-            if(i == 0 || !colorEq(colors[i][j], colors[i - 1][j])) {
+            if(colors[i][j] && (i == 0 || !colorEq(colors[i][j], colors[i - 1][j]))) {
                 diff[i][`${j}`] = toRGB32(colors[i][j]);
             }
         }

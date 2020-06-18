@@ -3,7 +3,7 @@ const router = express.Router();
 const join = require("path").join;
 const fs = require("fs");
 
-const controller = require(join(__dirname, '..', 'tools', 'lights-controller'));
+const controller = require(join(__dirname, '..', 'controllers', 'lights-controller'));
 
 
 router.post('/set-all', (req, res) => {

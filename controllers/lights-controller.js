@@ -4,7 +4,7 @@ const RGBtoHSL = require('rgb-to-hsl');
 const defaults = require('defaults');
 
 const leds = require(join(__dirname, 'led-controller'));
-const bulb = require(join(__dirname, 'tp-controller'));
+const bulb = require(join(__dirname, 'bulb-controller'));
 
 
 
@@ -12,8 +12,8 @@ const bulb = require(join(__dirname, 'tp-controller'));
 const setAll = (color) => {
 
     return Promise.all([
-        bulb.setBulb(color),
-        leds.set_color(color)
+        bulb.set_bulb(color),
+        leds.set_color({color})
     ]);
 
 }
@@ -30,9 +30,16 @@ const allOff = () => {
 const cascadeOn = (color) => {
 
     allOff()
-    .then(() => leds.cascade_on(color))
-    .then(() => bulb.setBulb(color));
+    .then(() => leds.cascade_on({color}))
+    .then(() => bulb.set_bulb(color));
 
+}
+
+const cascadeLightMiddle = (color) => {
+    allOff()
+    .then(() => leds.cascade_on({color, subset: [0, 30]}))
+    .then(() => bulb.set_bulb(color))
+    .then(() => leds.cascade_on({color, subset: [30, 68]}));
 }
 
 
@@ -45,7 +52,7 @@ const pingPong = (settings) => {
         baseColor: [255, 255, 255]
     });
 
-    bulb.setBulb(settings.baseColor)
+    bulb.set_bulb(settings.baseColor)
     .then(() => { leds.states.pingPong({
         refreshRate: 60,
         baseColor: settings.baseColor,
@@ -71,6 +78,7 @@ module.exports = {
     allOff,
     randomRipple,
     cascadeOn,
-    connect_led
+    connect_led,
+    cascadeLightMiddle,
     
 }
