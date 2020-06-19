@@ -62,10 +62,10 @@ const sendWake = () => {
     });
 }
 
-const ac = () => {
+const toggle = (action) => {
     $.post({
-        url: '/api/toggle/ac',
-        data: {action: "off"},
+        url: '/api/toggle/desktop',
+        data: {action},
         success: (msg) => {
             console.log(msg);
         }

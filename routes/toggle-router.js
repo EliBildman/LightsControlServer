@@ -20,6 +20,8 @@ router.post('/desktop', (req, res) => {
 
     }).catch((err) => {
 
+        console.log('Toggle Error:\n' + err)
+
         res.status(500);
         res.end(JSON.stringify(err));
 
