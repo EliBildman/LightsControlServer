@@ -46,15 +46,12 @@ const desktop = (action) => {
                 else {
 
                     conn.on('ready', () => {
-                        console.log('connceted');
                         conn.exec('shutdown /p', (err, stream) => { 
                             if(err) rej(err);
-                            stream.on('close', (code, signal) => {
-                                console.log('herer');
-                                conn.end();
-                            });
                             res("Sent Shutdown Command"); 
                         });
+                    }).on('error', (e) => {
+                        //lol nothing i love this hack
                     }).connect({
                         host: desktop_config.ip,
                         port: desktop_config.ssh_port,

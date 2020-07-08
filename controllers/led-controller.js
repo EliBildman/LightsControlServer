@@ -96,7 +96,7 @@ const cascade_on = (options) => {
         baseColor: [0, 0, 0],
         subset: [0, max_index() + 1],
         strip_subset: [0, Number.MAX_VALUE],
-        delay: 30
+        delay: 20
     });
 
     return run_sequence((strip) => {
