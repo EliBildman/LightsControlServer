@@ -2,14 +2,21 @@ const join = require('path').join;
 const fs = require('fs');
 const RGBtoHSL = require('rgb-to-hsl');
 const defaults = require('defaults');
+const events = require('../scheduling/events')
 
 const leds = require(join(__dirname, 'led-controller'));
 const bulb = require(join(__dirname, 'bulb-controller'));
 
+let lights_on = false;
 
-
+events.on('lights_on', () => {
+    console.log('hello');
+}).cancel();
 
 const setAll = (color) => {
+
+    if(!lights_on) events.run('lights_on');
+    lights_on = true;
 
     return Promise.all([
         bulb.set_bulb(color),
@@ -20,6 +27,9 @@ const setAll = (color) => {
 
 const allOff = () => {
 
+    if(lights_on) events.run('lights_off');
+    lights_on = false;
+
     return Promise.all([
         bulb.off(),
         leds.off()
@@ -28,6 +38,9 @@ const allOff = () => {
 }
 
 const cascadeOn = (color) => {
+
+    if(!lights_on) events.run('lights_on');
+    lights_on = true;
 
     allOff()
     .then(() => leds.cascade_on({color}))

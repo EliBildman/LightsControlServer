@@ -5,14 +5,13 @@ const ping = require('ping');
 const ssh2 = require('ssh2');
 const fs = require('fs');
 
-const desktop_config = require(join(__dirname, '..', 'configs', 'desktop-config'));
-const ac_config = require(join(__dirname, '..', 'configs', 'ac-config'));
-const ssh_config = require(join(__dirname, '..', 'configs', 'ssh-config'));
+const devices = require("../configs/devices-config.json");
+const ssh_config = require("../configs/ssh-config.json");
 
 let ac_plug;
 
 const client = new tpApi.Client();
-client.startDiscovery({macAddresses: [ac_config.mac], discoveryTimeout: 5000}).on('plug-new', (plug) => {
+client.startDiscovery({macAddresses: [devices.ac.mac], discoveryTimeout: 5000}).on('plug-new', (plug) => {
     ac_plug = plug;
     client.stopDiscovery();
 });
@@ -25,7 +24,7 @@ const desktop = (action) => {
     
         return new Promise((res, rej) => {
 
-            wol(desktop_config.mac)
+            wol(devices.desktop.mac)
             .then(() => {
                 res('Sending WOL package');
             })
@@ -42,6 +41,7 @@ const desktop = (action) => {
         return new Promise((res, rej) => {
 
             desktop('get').then(status => {
+                
                 if(!status) res("Desktop already off");
                 else {
 
@@ -53,9 +53,9 @@ const desktop = (action) => {
                     }).on('error', (e) => {
                         //lol nothing i love this hack
                     }).connect({
-                        host: desktop_config.ip,
-                        port: desktop_config.ssh_port,
-                        username: desktop_config.user,
+                        host: devices.desktop.ip,
+                        port: devices.desktop.ssh_port,
+                        username: devices.desktop.username,
                         privateKey: fs.readFileSync(ssh_config.private_key_path)
                     });
 
@@ -71,7 +71,7 @@ const desktop = (action) => {
 
         return new Promise((res, rej) => {
 
-            ping.sys.probe(desktop_config.ip, (isAlive) => {
+            ping.sys.probe(devices.desktop.ip, (isAlive) => {
                 res(isAlive);
             });
 
@@ -89,11 +89,17 @@ const desktop = (action) => {
 const ac = (action) => {
 
     if ( action == 'on' ) {
+
         return ac_plug.setPowerState(true);
+
     } else if ( action == 'off' ) {
+
         return ac_plug.setPowerState(false);
+
     } else if ( action == 'get' ) {
+
         return ac_plug.getPowerState();
+
     } else {
         return new Promise( (res, rej) => { rej('Bad Action') } );
     }

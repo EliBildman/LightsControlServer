@@ -22,9 +22,10 @@ router.post('/set-all', (req, res) => {
 });
 
 router.post('/all-off', (req, res) => {
+    
     controller.allOff();
-
     res.end('OK');
+    
 });
 
 

@@ -1,6 +1,6 @@
 const join = require('path').join;
-const socket_send = require(join(__dirname, '..' , 'tools', 'socket-send'));
-const states = require(join(__dirname, '..', 'tools', 'led_states'));
+const socket_send = require('../tools/led-socket');
+const states = require('../tools/led_states');
 const defaults = require('defaults');
 
 
@@ -123,7 +123,7 @@ const cascade_on = (options) => {
 
     }, options.subset);
 
-}
+};
 
 
 const ping_pong = (options) => {

@@ -16,7 +16,7 @@ const socket = (ws) => {
 
         if(msg.type === 'CONFIG') {
 
-            console.log("NEW LIGHTS STRIP CONNECTED");
+            console.log("Light Strip -- Length: " + msg.length + " Index: " + msg.index);
 
             config.ready = true;
             config.pipe = ws;
@@ -34,6 +34,8 @@ const socket = (ws) => {
     ws.on('close', (e) => {
         
         console.log('disconnect ' + e);
+
+        ws.terminate();
         
         // if(rsn.code  === 1000) { //normal
 
@@ -62,7 +64,7 @@ const socket = (ws) => {
 
         ws.send(JSON.stringify(state));
 
-        console.log('sending state: ' + state.id);
+        // console.log('sending state: ' + state.id);
 
         return new Promise((res, rej) => {
             const callback_listener = (msg) => {
