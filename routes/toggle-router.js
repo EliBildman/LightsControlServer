@@ -29,29 +29,29 @@ router.post('/desktop', (req, res) => {
 
 });
 
-router.post('/ac', (req, res) => {
+// router.post('/ac', (req, res) => {
 
-    if( !req.body.action || !['on', 'off', 'get'].includes(req.body.action) ) {
+//     if( !req.body.action || !['on', 'off', 'get'].includes(req.body.action) ) {
     
-        res.status(400);
-        res.end();
-        return;
+//         res.status(400);
+//         res.end();
+//         return;
 
-    }
+//     }
 
-    controller.ac( req.body.action ).then( (data) => {
+//     controller.ac( req.body.action ).then( (data) => {
 
-        res.status(200);
-        res.end(JSON.stringify(data));
+//         res.status(200);
+//         res.end(JSON.stringify(data));
 
-    }).catch( (err) => {
+//     }).catch( (err) => {
 
-        res.status(500);
-        res.end(JSON.stringify(err));
+//         res.status(500);
+//         res.end(JSON.stringify(err));
 
-    });
+//     });
 
-});
+// });
 
 
 module.exports = router;

@@ -62,6 +62,16 @@ const sendWake = () => {
     });
 }
 
+const sendOff = () => {
+    $.post({
+        url: '/api/toggle/desktop',
+        data: {action: "off"},
+        success: (msg) => {
+            console.log(msg);
+        }
+    });
+}
+
 const toggle = (action) => {
     $.post({
         url: '/api/toggle/desktop',

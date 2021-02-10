@@ -8,15 +8,15 @@ const fs = require('fs');
 const devices = require("../configs/devices-config.json");
 const ssh_config = require("../configs/ssh-config.json");
 
-let ac_plug;
+// let ac_plug;
 
-const client = new tpApi.Client();
-client.startDiscovery({macAddresses: [devices.ac.mac], discoveryTimeout: 5000}).on('plug-new', (plug) => {
-    ac_plug = plug;
-    client.stopDiscovery();
-});
+// const client = new tpApi.Client();
+// client.startDiscovery({macAddresses: [devices.ac.mac], discoveryTimeout: 5000}).on('plug-new', (plug) => {
+//     ac_plug = plug;
+//     client.stopDiscovery();
+// });
 
-// all toggleable devices should support 'on' 'off' and 'get' and always returns a promise
+// all toggleable devices should support only 'on' 'off' and 'get' and always returns a promise
 
 const desktop = (action) => {
 
@@ -44,7 +44,6 @@ const desktop = (action) => {
                 
                 if(!status) res("Desktop already off");
                 else {
-
                     conn.on('ready', () => {
                         conn.exec('shutdown /p', (err, stream) => { 
                             if(err) rej(err);
@@ -86,27 +85,27 @@ const desktop = (action) => {
 
 }
 
-const ac = (action) => {
+// const ac = (action) => {
 
-    if ( action == 'on' ) {
+//     if ( action == 'on' ) {
 
-        return ac_plug.setPowerState(true);
+//         return ac_plug.setPowerState(true);
 
-    } else if ( action == 'off' ) {
+//     } else if ( action == 'off' ) {
 
-        return ac_plug.setPowerState(false);
+//         return ac_plug.setPowerState(false);
 
-    } else if ( action == 'get' ) {
+//     } else if ( action == 'get' ) {
 
-        return ac_plug.getPowerState();
+//         return ac_plug.getPowerState();
 
-    } else {
-        return new Promise( (res, rej) => { rej('Bad Action') } );
-    }
+//     } else {
+//         return new Promise( (res, rej) => { rej('Bad Action') } );
+//     }
 
-}
+// }
 
 module.exports = {
     desktop,
-    ac
+    // ac
 }
