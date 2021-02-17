@@ -1,7 +1,6 @@
 const cron = require('node-schedule');
 const ir_sensor = require('../controllers/ir_sensor_controller');
 
-
 /* 
 events:
 room_entered: after inactivety for n minuets, any activity in room (activity detected by ir sensor)
@@ -33,6 +32,8 @@ const on = (event, callback) => {
 
 //TODO: maybe add some parameter with info on time called etc
 const run = (event) => {
+
+    console.log(`Event triggered: ${event}`);
 
     const on_event = listeners.filter(listener => listener.event === event);
     for( listener of on_event ) {

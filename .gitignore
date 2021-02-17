@@ -3,3 +3,4 @@ node_modules/*
 testing.js
 configs/*
 !configs/.placeholder
+foo.js

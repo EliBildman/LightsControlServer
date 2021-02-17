@@ -1,12 +1,18 @@
 const events = require('./scheduling/events');
-const sun = require('./scheduling/sun')
+const sun = require('./scheduling/sun');
+const lights = require('./scheduling/lights-activity');
 
-sun.start_sun_event()
+sun.setup_sun_event();
+lights.setup_lights_activity_event();
 
-events.on('room_entered', () => {
-    console.log('room active');
-});
 
-events.on('room_empty', () => {
-    console.log('room inactive');
-});
+
+let x = true;
+setInterval(() => {
+    if(x) {
+        events.run('room_entered');
+    } else {
+        events.run('room_empty');
+    }
+    x = !x;
+}, 5000);
