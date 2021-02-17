@@ -12,8 +12,13 @@ const set_events = () => {
 
 }
 
-schedule.scheduleJob('0 0 0 * * *', (fire_date) => {
+const start_sun_event = () => {
+    schedule.scheduleJob('0 0 0 * * *', (fire_date) => {
+        set_events();
+    });
     set_events();
-});
+}
 
-set_events();
+module.exports = {
+    start_sun_event
+}

@@ -6,6 +6,7 @@ let inactivity_timeout;
 
 const inactive = () => {
     events.run('room_empty');
+    active = false;
 }
 
 const set_active = () => {

@@ -4,6 +4,8 @@ const join = require('path').join;
 const bodyParser = require('body-parser');
 const expressWs = require('express-ws')(app);
 
+const _settings = require('./settings');
+
 const port = 3000;
 
 //middleware (?)
@@ -15,9 +17,11 @@ app.use(bodyParser.json());
 //routes
 const lightsRoute = require(join(__dirname, 'routes', 'lights-router'));
 const toggleRoute = require(join(__dirname, 'routes', 'toggle-router'));
+const eventsRoute = require(join(__dirname, 'routes', 'events-router'));
 
 app.use('/api/lights', lightsRoute);
 app.use('/api/toggle', toggleRoute);
+app.use('/api/events', eventsRoute)
 
 
 //index

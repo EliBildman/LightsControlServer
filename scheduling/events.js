@@ -1,7 +1,6 @@
 const cron = require('node-schedule');
 const ir_sensor = require('../controllers/ir_sensor_controller');
 
-const sun = require('./sun');
 
 /* 
 events:
@@ -32,6 +31,7 @@ const on = (event, callback) => {
 
 };
 
+//TODO: maybe add some parameter with info on time called etc
 const run = (event) => {
 
     const on_event = listeners.filter(listener => listener.event === event);
