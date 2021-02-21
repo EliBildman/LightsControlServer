@@ -7,12 +7,22 @@ const events = require('../scheduling/events')
 const leds = require(join(__dirname, 'led-controller'));
 const bulbs = require(join(__dirname, 'bulb-controller'));
 
-let lights_on = false;
+const get_lights_on = () => {
+
+    return get_states().then((states) => {
+        for(light in states) {
+            if(states[light].on_off) return true;
+        }
+        return false;
+    });
+
+};
 
 const set_all = (color) => {
 
-    if(!lights_on) events.run('lights_on');
-    lights_on = true;
+
+    get_lights_on().then((on) => { if(!on) events.run('lights_on'); }  );
+
 
     return Promise.all([
         bulbs.set_bulb(color),
@@ -23,8 +33,7 @@ const set_all = (color) => {
 
 const on = (trans = 1000) => {
 
-    if(!lights_on) events.run('lights_on');
-    lights_on = true;
+    get_lights_on().then((on) => { if(!on) events.run('lights_on'); }  );
 
     return Promise.all([
         bulbs.on(trans),
@@ -35,15 +44,21 @@ const on = (trans = 1000) => {
 
 const off = (trans = 1000) => {
 
-    if(lights_on) events.run('lights_off');
-    lights_on = false;
+    get_lights_on().then((on) => { if(on) events.run('lights_off'); }  );
 
     return Promise.all([
         bulbs.off(trans),
         // leds.off()
     ]);
 
-}
+};
+
+const get_states = () => {
+
+    return bulbs.get_state(); //add leds when they work lmao
+
+};
+
 
 // const cascadeOn = (color) => {
 
@@ -94,13 +109,15 @@ const connect_led = (ws) => {
 
 module.exports = {
 
-    // pingPong,
+    get_lights_on,
     set_all,
     off,
     on,
+    get_states,
+    connect_led,
+    // pingPong,
     // randomRipple,
     // cascadeOn,
-    connect_led,
     // cascadeLightMiddle,
     
 }

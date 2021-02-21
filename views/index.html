@@ -6,40 +6,15 @@
     <title>Lightz</title>
  </head>
  <body>
-    <div class="row w-100">
-      <div class="col">
-         <h3>Set To</h3>
-      </div>
-      <div class="col">
-         <input id="r" type="number">
-      </div>
-      <div class="col">
-         <input id="g" type="number">
-      </div>
-      <div class="col">
-         <input id="b" type="number">
-      </div>
-      <div class="col" id="enter">
-         <button onclick="manualDemo()">SET</button>
-      </div>
-    </div>
-    <div class="row w-100">
-      <div class="col">
-         <h3>Test Ani</h3>
-      </div>
-      <div class="col">
-         <input id="aniR" type="number">
-         <input id="aniG" type="number">
-         <input id="aniB" type="number">
-      </div>
-      <button onclick="rippleDemo()">RIPPLE</button>
-      <button onclick="cascadeDemo()">CASCADE</button>
-      <button onclick="pingPongDemo()">PONG</button>
-   </div>
    <div class="row px-5">
       <h1>Computer:</h1>
       <button class = 'col-3' onclick="sendWake()">ON</button>
       <button class = 'col-3' onclick="sendOff()">OFF</button>
+    </div>
+    <div class="row px-5">
+      <h1>Lights:</h1>
+      <button class = 'col-3' onclick="lightsOn()">ON</button>
+      <button class = 'col-3' onclick="lightsOff()">OFF</button>
     </div>
 
  </body>

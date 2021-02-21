@@ -81,3 +81,23 @@ const toggle = (action) => {
         }
     });
 }
+
+const lightsOff = () => {
+    $.post({
+        url: '/api/lights/all-off',
+        data: {action: "off"},
+        success: (msg) => {
+            console.log(msg);
+        }
+    });
+}
+
+const lightsOn = () => {
+    $.post({
+        url: '/api/lights/all-on',
+        data: {action: "off"},
+        success: (msg) => {
+            console.log(msg);
+        }
+    });
+}

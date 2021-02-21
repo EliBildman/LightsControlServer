@@ -3,7 +3,9 @@
     "version": "1.0.0",
     "scripts": {
         "start": "node ./app.js",
-        "dev": "nodemon ./app.js"
+        "dev": "nodemon ./app.js",
+        "daemon": "pm2 start app.js",
+        "stop-daemon": "pm2 stop app.js"
     },
     "dependencies": {
         "axios": "^0.19.2",

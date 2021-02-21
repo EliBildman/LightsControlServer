@@ -7,12 +7,12 @@ lights.setup_lights_activity_event();
 
 
 
-let x = true;
-setInterval(() => {
-    if(x) {
-        events.run('room_entered');
-    } else {
-        events.run('room_empty');
-    }
-    x = !x;
-}, 5000);
+// let x = true;
+// setInterval(() => {
+//     if(x) {
+//         events.run('room_entered');
+//     } else {
+//         events.run('room_empty');
+//     }
+//     x = !x;
+// }, 5000);

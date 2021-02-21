@@ -15,15 +15,22 @@ router.post('/set-all', (req, res) => {
 
     req.body.color.map(parseInt);
 
-    controller.setAll(req.body.color);
+    controller.set_all(req.body.color);
 
+    res.end('OK');
+    
+});
+
+router.post('/all-on', (req, res) => {
+    
+    controller.on();
     res.end('OK');
     
 });
 
 router.post('/all-off', (req, res) => {
     
-    controller.allOff();
+    controller.off();
     res.end('OK');
     
 });
