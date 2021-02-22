@@ -1,0 +1,56 @@
+[
+    {
+        "name": "Only Lamp",
+        "light_states": {
+            "smartbulbs": [],
+            "toggleables": [
+                {
+                    "name": "Lampert",
+                    "is_on": true
+                }
+            ]
+        }
+    },
+    {
+        "name": "Overhead On",
+        "light_states": {
+            "smartbulbs": [
+                {
+                    "name": "Dick",
+                    "is_on": true,
+                    "color": [200, 200, 200]
+                },
+                {
+                    "name": "Frankfurt",
+                    "is_on": true,
+                    "color": [200, 200, 200]
+                }
+            ],
+            "toggleables": []
+        }
+    },
+    {
+        "name": "Everything On",
+        "light_states": {
+            "smartbulbs": [
+                {
+                    "name": "Dick",
+                    "is_on": true,
+                    "color": [255, 255, 255]
+                },
+                {
+                    "name": "Frankfurt",
+                    "is_on": true,
+                    "color": [255, 255, 255]
+                }
+            ],
+            "toggleables": [
+                {
+                    "name": "Lampert",
+                    "is_on": true
+                }
+            ]
+        }
+    }
+
+]

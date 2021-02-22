@@ -1,5 +1,3 @@
-const cron = require('node-schedule');
-const ir_sensor = require('../controllers/ir_sensor_controller');
 
 /* 
 events:

@@ -1,111 +1,55 @@
-const wol = require('wakeonlan');
-const join = require('path').join;
-const tpApi = require('tplink-smarthome-api');
-const ping = require('ping');
-const ssh2 = require('ssh2');
-const fs = require('fs');
+const computer_controller = require('./computer-controller');
+const plug_controller = require('./plug-controller');
 
-const devices = require("../configs/devices-config.json");
-const ssh_config = require("../configs/ssh-config.json");
+const get_device = require('../tools/helpers').get_device;
 
-// let ac_plug;
+const devices = computer_controller.computers.concat(plug_controller.plugs);
 
-// const client = new tpApi.Client();
-// client.startDiscovery({macAddresses: [devices.ac.mac], discoveryTimeout: 5000}).on('plug-new', (plug) => {
-//     ac_plug = plug;
-//     client.stopDiscovery();
-// });
+const turn_on = (info) => {
 
-// all toggleable devices should support only 'on' 'off' and 'get' and always returns a promise
-
-const desktop = (action) => {
-
-    if ( action == 'on' ) {
-    
-        return new Promise((res, rej) => {
-
-            wol(devices.desktop.mac)
-            .then(() => {
-                res('Sending WOL package');
-            })
-            .catch((e) => {
-                rej(e);
-            });
-
-        });
-
-    } else if ( action == 'off' ) {
-
-        let conn = new ssh2.Client();
-
-        return new Promise((res, rej) => {
-
-            desktop('get').then(status => {
-                
-                if(!status) res("Desktop already off");
-                else {
-                    conn.on('ready', () => {
-                        conn.exec('shutdown /p', (err, stream) => { 
-                            if(err) rej(err);
-                            res("Sent Shutdown Command"); 
-                        });
-                    }).on('error', (e) => {
-                        //lol nothing i love this hack
-                    }).connect({
-                        host: devices.desktop.ip,
-                        port: devices.desktop.ssh_port,
-                        username: devices.desktop.username,
-                        privateKey: fs.readFileSync(ssh_config.private_key_path)
-                    });
-
-                }
-
-            }).catch(e => { rej(e) });
-
-        });
-
-        
-
-    } else if ( action == 'get' ) {
-
-        return new Promise((res, rej) => {
-
-            ping.sys.probe(devices.desktop.ip, (isAlive) => {
-                res(isAlive);
-            });
-
-            setTimeout(() => { rej('Something stalled...') }, 5000);
-
-        });
-        
-        
-    } else {
-        return new Promise( (res, rej) => { rej('Bad Action') } );
-    }
+    d = get_device(info, devices);
+    return d.on()
 
 }
 
-// const ac = (action) => {
+const turn_off = (info) => {
 
-//     if ( action == 'on' ) {
+    d = get_device(info, devices);
+    return d.off()
 
-//         return ac_plug.setPowerState(true);
+}
 
-//     } else if ( action == 'off' ) {
+const get = (info) => {
 
-//         return ac_plug.setPowerState(false);
+    d = get_device(info, devices);
+    return d.get()
 
-//     } else if ( action == 'get' ) {
+}
 
-//         return ac_plug.getPowerState();
+const take_scene = (scene) => {
 
-//     } else {
-//         return new Promise( (res, rej) => { rej('Bad Action') } );
-//     }
+    let promises = [];
 
-// }
+    for( config in scene.toggleables ) {
+        
+        d = get_device({name: config.name});
+
+        if(config.is_on) {
+            if(config.is_on) promises.push(d.turn_on());
+        } else {
+            promises.push(d.turn_off());
+        }
+
+    }
+
+    return Promise.all(promises);
+
+};
+
 
 module.exports = {
-    desktop,
-    // ac
+    take_scene,
+    turn_on,
+    turn_off,
+    get,
 }

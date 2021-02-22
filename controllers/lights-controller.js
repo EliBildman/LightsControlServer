@@ -1,61 +1,114 @@
-const join = require('path').join;
-const fs = require('fs');
-const RGBtoHSL = require('rgb-to-hsl');
-const defaults = require('defaults');
 const events = require('../scheduling/events')
+const get_device = require('../tools/helpers').get_device;
 
-const leds = require(join(__dirname, 'led-controller'));
-const bulbs = require(join(__dirname, 'bulb-controller'));
+// const leds = require(join(__dirname, 'led-controller'));
+const bulbs = require('./bulb-controller').bulbs;
+const plugs = require('./plug-controller').plugs.filter(p => p.function == 'LIGHT');
+
+
+const run_on_all = (callback, only_bulbs = false) => {
+
+    let promises = [];
+
+    for(b in bulbs) promises.push(callback(b));
+
+    if(!only_bulbs) {
+        for(p in plugs) promises.push(callback(p));
+    }
+
+    return Promise.all(promises);
+
+}
 
 const get_lights_on = () => {
 
     return get_states().then((states) => {
-        for(light in states) {
-            if(states[light].on_off) return true;
-        }
-        return false;
+        for(s of states) if(s) return true;
     });
 
 };
 
 const set_all = (color) => {
 
+    // get_lights_on().then((on) => { if(!on) events.run('lights_on'); }  ); TODO: figure out how to throw this event when changed from the app
 
-    get_lights_on().then((on) => { if(!on) events.run('lights_on'); }  );
-
-
-    return Promise.all([
-        bulbs.set_bulb(color),
-        leds.set_color({color})
-    ]);
+    return run_on_all((bulb) => {
+        bulb.set(color);
+    }, only_bulbs = true);
 
 }
 
-const on = (trans = 1000) => {
+const all_on = (trans = 1000) => {
 
-    get_lights_on().then((on) => { if(!on) events.run('lights_on'); }  );
+    // get_lights_on().then((on) => { if(!on) events.run('lights_on'); }  );
 
-    return Promise.all([
-        bulbs.on(trans),
-        // leds.on()
-    ]);
+    return run_on_all((light) => {
+        light.on();
+    });
 
 }
 
-const off = (trans = 1000) => {
+const all_off = (trans = 1000) => {
 
-    get_lights_on().then((on) => { if(on) events.run('lights_off'); }  );
+    // get_lights_on().then((on) => { if(on) events.run('lights_off'); }  );
 
-    return Promise.all([
-        bulbs.off(trans),
-        // leds.off()
-    ]);
+    return run_on_all((light) => {
+        light.off();
+    });
 
 };
 
 const get_states = () => {
 
-    return bulbs.get_state(); //add leds when they work lmao
+    return run_on_all((light) => light.get()) //add leds when they work lmao
+
+};
+
+const turn_on = (info) => {
+
+    d = get_device(info, lights);
+    return d.on()
+
+}
+
+const turn_off = (info) => {
+
+    d = get_device(info, lights);
+    return d.off()
+
+}
+
+const get = (info) => {
+
+    d = get_device(info, lights);
+    return d.get()
+
+}
+
+const set = (info, color) => {
+
+    d = get_device(info, lights);
+    return d.set(color)
+
+}
+
+const take_scene = (scene) => {
+
+    let promises = [];
+
+    for( config in scene.smartlights ) {
+        
+        d = get_device({name: config.name});
+
+        if(config.is_on) {
+            if(config.is_on) promises.push(d.set( config.color ));
+        } else {
+            promises.push(d.turn_off());
+        }
+
+    }
+
+    return Promise.all(promises);
 
 };
 
@@ -111,13 +164,18 @@ module.exports = {
 
     get_lights_on,
     set_all,
-    off,
-    on,
+    all_off,
+    all_on,
     get_states,
+    turn_on,
+    turn_off,
+    get,
+    set,
+    take_scene,
     connect_led,
     // pingPong,
     // randomRipple,
     // cascadeOn,
     // cascadeLightMiddle,
     
-}
+};
