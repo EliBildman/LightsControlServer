@@ -1,6 +1,6 @@
 const events = require('./scheduling/events');
 const sun = require('./scheduling/sun');
-const lights = require('./scheduling/lights-activity');
+const lights = require('./scheduling/lights-auto-off');
 
 sun.setup_sun_event();
 lights.setup_lights_activity_event();

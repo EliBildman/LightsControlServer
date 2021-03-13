@@ -1,6 +1,3 @@
-const tpapi = require('tplink-lightbulb');
-const device_configs = require('../configs/devices-config.json');
-
 const tp_controller = require('./tp-controller');
 
 let plugs = [];
@@ -10,13 +7,24 @@ tp_controller.when_ready.push(() => {
         return {
             name: p.name,
             mac: p.mac,
-            type: p.device,
+            type: p.type,
+            function: p.function,
             on: () => turn_on(p.device),
             off: () => turn_off(p.device),
             get: () => get(p.device),
         };
     });
 });
+
+const get_plugs = (_function = null) => {
+
+    if(_function == null) {
+        return plugs;
+    } else {
+        return plugs.filter(p => p.function == _function);
+    }
+
+};  
 
 const turn_on = (plug) => {
 
@@ -32,11 +40,17 @@ const turn_off = (plug) => {
 
 const get = (plug) => {
 
-    return plug.info().then(info => info.relay_state == 1);
+    return plug.info().then(info => {
+        return {
+            name: plug.name,
+            on_off: info.relay_state == 1,
+            type: 'plug'
+        }
+    });
 
 };
 
 module.exports = {
-    plugs
+    get_plugs
 };
 

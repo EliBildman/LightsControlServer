@@ -25,10 +25,10 @@ const devices_paired = new Promise((res, rej) => {
             let found_mac;
             if(info.mic_mac) found_mac = info.mic_mac;
             if(info.mac) found_mac = info.mac;
+
+            let plug_config = device_configs.plugs.find((p) => p.mac == found_mac);
     
             if( found_mac && macs.includes(found_mac) ) {
-    
-                // device.power(!info.light_state.on_off).then(() => { device.power(info.light_state.on_off) });
     
                 if(!devices[info.mic_type]) devices[info.mic_type] = [];
     
@@ -38,6 +38,8 @@ const devices_paired = new Promise((res, rej) => {
                     mac: found_mac,
                     type: info.mic_type
                 });
+
+                if(plug_config) devices[info.mic_type][ devices[info.mic_type].length - 1 ].function = plug_config.function;
     
                 console.log(`Registered new smart-device: ${info.alias}`);
     

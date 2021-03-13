@@ -7,6 +7,7 @@ const matches_fields = (sub, _super) => {
     for( f in sub ) {
         if(!_super[f] || _super[f] != sub[f]) return false;
     }
+    return true;
 };
 
 module.exports.get_device = (info, devices) => {

@@ -18,10 +18,11 @@ tp_controller.when_ready.push(() => {
             set: (color) => set(b.device, color)
         };
     });
-    bulbs[0].set([0, 0, 100]);
-    bulbs[1].set([0, 0, 100]);
 });
 
+const get_bulbs = () => {
+    return bulbs;
+};
 
 const set = (bulb, color, trans = 1) => {
 
@@ -33,7 +34,8 @@ const set = (bulb, color, trans = 1) => {
     return bulb.power(true, trans, options = {
         hue,
         saturation,
-        brightness
+        brightness,
+        color_temp: 0
     });
 }
 
@@ -51,10 +53,16 @@ const turn_off = (bulb, trans = 1000) => {
 
 const get_on = (bulb) => {
 
-    return bulb.info().then((info) => info.light_state);
+    return bulb.info().then((info) => {
+        return {
+            name: bulb.name,
+            on_off: info.light_state.on_off == 1,
+            type: "bulb"
+        }
+    });
 
 }
 
 module.exports = {
-    bulbs
+    get_bulbs
 };

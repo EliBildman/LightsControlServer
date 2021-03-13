@@ -15,7 +15,7 @@
         "name": "Overhead On",
         "light_states": {
             "smartbulbs": [
-                {
+                {   
                     "name": "Dick",
                     "is_on": true,
                     "color": [200, 200, 200]
@@ -48,6 +48,29 @@
                 {
                     "name": "Lampert",
                     "is_on": true
+                }
+            ]
+        }
+    },
+    {
+        "name": "Sex",
+        "light_states": {
+            "smartbulbs": [
+                {
+                    "name": "Dick",
+                    "is_on": true,
+                    "color": [161, 31, 122]
+                },
+                {
+                    "name": "Frankfurt",
+                    "is_on": true,
+                    "color": [161, 31, 122]
+                }
+            ],
+            "toggleables": [
+                {
+                    "name": "Lampert",
+                    "is_on": false
                 }
             ]
         }

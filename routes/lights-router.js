@@ -23,14 +23,14 @@ router.post('/set-all', (req, res) => {
 
 router.post('/all-on', (req, res) => {
     
-    controller.on();
+    controller.all_on();
     res.end('OK');
     
 });
 
 router.post('/all-off', (req, res) => {
     
-    controller.off();
+    controller.all_off();
     res.end('OK');
     
 });

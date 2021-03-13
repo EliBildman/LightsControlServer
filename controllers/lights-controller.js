@@ -2,18 +2,25 @@ const events = require('../scheduling/events')
 const get_device = require('../tools/helpers').get_device;
 
 // const leds = require(join(__dirname, 'led-controller'));
-const bulbs = require('./bulb-controller').bulbs;
-const plugs = require('./plug-controller').plugs.filter(p => p.function == 'LIGHT');
+const bulb_controller = require('./bulb-controller');
+const plug_controller = require('./plug-controller');
 
+const get_all_lights = () => {
+    return bulb_controller.get_bulbs().concat(plug_controller.get_plugs(_function = 'LIGHT'));
+}
 
 const run_on_all = (callback, only_bulbs = false) => {
 
+    const bulbs = bulb_controller.get_bulbs();
+    const plugs = plug_controller.get_plugs(_function = 'LIGHT');
     let promises = [];
 
-    for(b in bulbs) promises.push(callback(b));
+    for(b of bulbs) promises.push(callback(b));
 
     if(!only_bulbs) {
-        for(p in plugs) promises.push(callback(p));
+        for(p of plugs) {
+            promises.push(callback(p));
+        }
     }
 
     return Promise.all(promises);
@@ -51,8 +58,8 @@ const all_on = (trans = 1000) => {
 const all_off = (trans = 1000) => {
 
     // get_lights_on().then((on) => { if(on) events.run('lights_off'); }  );
-
     return run_on_all((light) => {
+        // console.log(light.name);
         light.off();
     });
 
@@ -66,28 +73,28 @@ const get_states = () => {
 
 const turn_on = (info) => {
 
-    d = get_device(info, lights);
+    d = get_device(info, get_all_lights());
     return d.on()
 
 }
 
 const turn_off = (info) => {
 
-    d = get_device(info, lights);
+    d = get_device(info, get_all_lights());
     return d.off()
 
 }
 
 const get = (info) => {
 
-    d = get_device(info, lights);
+    d = get_device(info, get_all_lights());
     return d.get()
 
 }
 
 const set = (info, color) => {
 
-    d = get_device(info, lights);
+    d = get_device(info, get_all_lights());
     return d.set(color)
 
 }
@@ -109,7 +116,34 @@ const take_scene = (scene) => {
     }
 
     return Promise.all(promises);
+    
+};
 
+const connect_led = (ws) => {
+
+    leds.new_strip(ws);
+
+}
+
+
+module.exports = {
+
+    get_lights_on,
+    set_all,
+    all_off,
+    all_on,
+    get_states,
+    turn_on,
+    turn_off,
+    get,
+    set,
+    take_scene,
+    connect_led,
+    // pingPong,
+    // randomRipple,
+    // cascadeOn,
+    // cascadeLightMiddle,
+    
 };
 
 
@@ -153,29 +187,3 @@ const take_scene = (scene) => {
 //         auxColors: [[100, 100, 0], [100, 100, 100]]
 //     }) });
 // }
-
-const connect_led = (ws) => {
-
-    leds.new_strip(ws);
-
-}
-
-module.exports = {
-
-    get_lights_on,
-    set_all,
-    all_off,
-    all_on,
-    get_states,
-    turn_on,
-    turn_off,
-    get,
-    set,
-    take_scene,
-    connect_led,
-    // pingPong,
-    // randomRipple,
-    // cascadeOn,
-    // cascadeLightMiddle,
-    
-};
