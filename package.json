@@ -31,6 +31,6 @@
         "tplink-smarthome-api": "^2.0.0",
         "uid": "^1.0.0",
         "wakeonlan": "^0.1.0",
-        "ws": "^7.4.3"
+        "ws": "^7.4.6"
     }
 }
