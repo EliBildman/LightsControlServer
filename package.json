@@ -24,7 +24,7 @@
         "rgb-to-hsl": "0.0.3",
         "rpi-ws281x": "^1.0.35",
         "rpi-ws281x-v2": "^1.3.4",
-        "ssh2": "^0.8.9",
+        "ssh2": "^1.4.0",
         "sunrise-sunset-js": "^2.2.1",
         "tplink-cloud-api": "^0.8.1",
         "tplink-lightbulb": "^1.5.3",
